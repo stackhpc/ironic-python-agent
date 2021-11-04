@@ -436,6 +436,13 @@ def md_restart(raid_device):
     """
     try:
         LOG.debug('Restarting software RAID device %s', raid_device)
+        # NOTE(mnasiadka): If the image is LVM based we need to clean
+        # dmsetup devices, because mdadm --stop will fail.
+        dmsetup_stdout, _ = il_utils.execute('dmsetup', 'table',
+                                             use_standard_locale=True)
+        if 'No devices found' not in dmsetup_stdout:
+            LOG.debug('Deactivating LVM')
+            il_utils.execute('dmsetup', 'remove_all')
         component_devices = get_component_devices(raid_device)
         il_utils.execute('mdadm', '--stop', raid_device)
         il_utils.execute('mdadm', '--assemble', raid_device,
@@ -599,11 +606,11 @@ def list_all_block_devices(block_type='disk',
                     "RAID volume. Found: %s", line)
             elif (devtype == 'md'
                   and (block_type == 'part'
-                       or block_type == 'md')):
-                # NOTE(dszumski): Partitions on software RAID devices have type
-                # 'md'. This may also contain RAID devices in a broken state in
-                # rare occasions. See https://review.opendev.org/#/c/670807 for
-                # more detail.
+                       or block_type == 'lvm')):
+                # NOTE(dszumski): Partitions and LVM volumes on software RAID
+                # devices have type 'md'. This may also contain RAID devices in
+                # a broken state in rare occasions. See
+                # https://review.opendev.org/#/c/670807 for more detail.
                 LOG.debug(
                     "TYPE detected to contain 'md', signifying a "
                     "RAID partition. Found: %s", line)
