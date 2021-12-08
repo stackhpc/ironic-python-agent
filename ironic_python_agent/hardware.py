@@ -2436,6 +2436,13 @@ class GenericHardwareManager(HardwareManager):
             return raid_devices
 
         raid_devices = _scan_raids()
+        # Remove contents of MD devices
+        for raid_device in raid_devices:
+            try:
+                il_utils.execute('wipefs', '-af', raid_device.name)
+            except processutils.ProcessExecutionError as e:
+                LOG.warning('Failed to wipefs %(device)s: %(err)s',
+                            {'device': raid_device.name, 'err': e})
         attempts = 0
         while attempts < 2:
             attempts += 1
