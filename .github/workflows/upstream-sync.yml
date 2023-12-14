@@ -8,23 +8,28 @@ permissions:
   contents: write
   pull-requests: write
 jobs:
-  synchronise-yoga:
-    name: Synchronise yoga
+  synchronise-2023-1:
+    name: Synchronise 2023.1
     uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
     with:
-      release_series: yoga
-  synchronise-xena:
-    name: Synchronise xena
-    uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
-    with:
-      release_series: xena
-  synchronise-wallaby:
-    name: Synchronise wallaby
-    uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
-    with:
-      release_series: wallaby
+      release_series: 2023.1
   synchronise-victoria:
     name: Synchronise victoria
     uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
     with:
       release_series: victoria
+  synchronise-wallaby:
+    name: Synchronise wallaby
+    uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
+    with:
+      release_series: wallaby
+  synchronise-xena:
+    name: Synchronise xena
+    uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
+    with:
+      release_series: xena
+  synchronise-yoga:
+    name: Synchronise yoga
+    uses: stackhpc/.github/.github/workflows/upstream-sync.yml@main
+    with:
+      release_series: yoga
