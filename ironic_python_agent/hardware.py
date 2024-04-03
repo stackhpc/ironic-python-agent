@@ -40,6 +40,11 @@ import stevedore
 import yaml
 
 from ironic_python_agent import burnin
+<<<<<<< HEAD
+=======
+from ironic_python_agent import disk_utils
+from ironic_python_agent import efi_utils
+>>>>>>> 215fecd4 (Step to clean UEFI NVRAM entries)
 from ironic_python_agent import encoding
 from ironic_python_agent import errors
 from ironic_python_agent.extensions import base as ext_base
@@ -77,6 +82,24 @@ RAID_APPLY_CONFIGURATION_ARGSINFO = {
             "Setting this to 'True' indicates to delete existing RAID "
             "configuration prior to creating the new configuration. "
             "Default value is 'True'."
+        ),
+        "required": False,
+    }
+}
+
+DEFAULT_CLEAN_UEFI_NVRAM_MATCH_PATTERNS = [
+    r'^HD\(',
+    r'shim.*\.efi',
+    r'grub.*\.efi'
+]
+DEPLOY_CLEAN_UEFI_NVRAM_ARGSINFO = {
+    "match_patterns": {
+        "description": (
+            "Json blob contains a list of regex patterns where any UEFI "
+            "NVRAM entry matching that pattern will be deleted. "
+            "Default value is "
+            "'[\"{}\"]'".format('", "'.join(
+                DEFAULT_CLEAN_UEFI_NVRAM_MATCH_PATTERNS))
         ),
         "required": False,
     }
@@ -2272,6 +2295,14 @@ class GenericHardwareManager(HardwareManager):
                 'abortable': True
             },
             {
+                'step': 'clean_uefi_nvram',
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'abortable': True,
+                'argsinfo': DEPLOY_CLEAN_UEFI_NVRAM_ARGSINFO,
+            },
+            {
                 'step': 'delete_configuration',
                 'priority': 0,
                 'interface': 'raid',
@@ -2331,6 +2362,13 @@ class GenericHardwareManager(HardwareManager):
                 'argsinfo': RAID_APPLY_CONFIGURATION_ARGSINFO,
             },
             {
+                'step': 'clean_uefi_nvram',
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'argsinfo': DEPLOY_CLEAN_UEFI_NVRAM_ARGSINFO,
+            },
+            {
                 'step': 'write_image',
                 # NOTE(dtantsur): this step has to be proxied via an
                 # out-of-band step with the same name, hence the priority here
@@ -2348,6 +2386,106 @@ class GenericHardwareManager(HardwareManager):
             },
         ]
 
+<<<<<<< HEAD
+=======
+    # TODO(TheJulia): There has to be a better way, we should
+    # make this less copy paste. That being said, I can also see
+    # unique priorites being needed.
+    def get_service_steps(self, node, ports):
+        service_steps = [
+            {
+                'step': 'delete_configuration',
+                'priority': 0,
+                'interface': 'raid',
+                'reboot_requested': False,
+                'abortable': True
+            },
+            {
+                'step': 'apply_configuration',
+                'priority': 0,
+                'interface': 'raid',
+                'reboot_requested': False,
+                'argsinfo': RAID_APPLY_CONFIGURATION_ARGSINFO,
+            },
+            {
+                'step': 'create_configuration',
+                'priority': 0,
+                'interface': 'raid',
+                'reboot_requested': False,
+                'abortable': True
+            },
+            {
+                'step': 'burnin_cpu',
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'abortable': True
+            },
+            # NOTE(TheJulia): Burnin disk is explicitly not carried in this
+            # list because it would be destructive to data on a disk.
+            # If someone needs to do that, the machine should be
+            # unprovisioned.
+            {
+                'step': 'burnin_memory',
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'abortable': True
+            },
+            {
+                'step': 'burnin_network',
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'abortable': True
+            },
+            {
+                'step': 'write_image',
+                # NOTE(dtantsur): this step has to be proxied via an
+                # out-of-band step with the same name, hence the priority here
+                # doesn't really matter.
+                'priority': 0,
+                'interface': 'deploy',
+                'reboot_requested': False,
+            },
+            {
+                'step': 'inject_files',
+                'priority': CONF.inject_files_priority,
+                'interface': 'deploy',
+                'reboot_requested': False,
+                'argsinfo': inject_files.ARGSINFO,
+            },
+        ]
+        # TODO(TheJulia): Consider erase_devices and friends...
+        return service_steps
+
+    def clean_uefi_nvram(self, node, ports, match_patterns=None):
+        """Clean UEFI NVRAM entries.
+
+        :param node: A dictionary of the node object.
+        :param ports: A list of dictionaries containing information
+                      of ports for the node.
+        :param match_patterns: A list of string regular expression patterns
+                               where any matching entry will be deleted.
+        """
+        if match_patterns is None:
+            match_patterns = DEFAULT_CLEAN_UEFI_NVRAM_MATCH_PATTERNS
+        validation_error = ('The match_patterns must be a list of strings: '
+                            '{}').format(match_patterns)
+        if not type(match_patterns) is list:
+            raise errors.InvalidCommandParamsError(validation_error)
+        patterns = []
+        for item in match_patterns:
+            if not isinstance(item, str):
+                raise errors.InvalidCommandParamsError(validation_error)
+            try:
+                patterns.append(re.compile(item, flags=re.IGNORECASE))
+            except re.error:
+                raise errors.InvalidCommandParamsError(validation_error)
+
+        return efi_utils.clean_boot_records(patterns=patterns)
+
+>>>>>>> 215fecd4 (Step to clean UEFI NVRAM entries)
     def apply_configuration(self, node, ports, raid_config,
                             delete_existing=True):
         """Apply RAID configuration.
