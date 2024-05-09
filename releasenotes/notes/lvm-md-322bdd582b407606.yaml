@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add support for LVM based images in MD (software RAID) scenario.
