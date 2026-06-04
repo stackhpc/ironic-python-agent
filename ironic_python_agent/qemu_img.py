@@ -98,7 +98,7 @@ def image_info(path, source_format=None):
     stop=tenacity.stop_after_attempt(CONF.disk_utils.image_convert_attempts),
     reraise=True)
 def convert_image(source, dest, out_format, cache=None, out_of_order=False,
-                  sparse_size=None, source_format=None):
+                  sparse_size=None, source_format=None, skip_target_create=False):
     """Convert image to other format.
 
     This method is only to be run against images who have passed
@@ -106,6 +106,8 @@ def convert_image(source, dest, out_format, cache=None, out_of_order=False,
     passed in. Any other usage is a major security risk.
     """
     cmd = ['qemu-img', 'convert', '-O', out_format]
+    if skip_target_create:
+        cmd += ['-n']
     if cache is not None:
         cmd += ['-t', cache]
     if sparse_size is not None:

@@ -326,7 +326,8 @@ class TestStandbyExtension(base.IronicAgentTest):
                                              sparse_size='0',
                                              source_format=source_format,
                                              cache='directsync',
-                                             out_of_order=True)
+                                             out_of_order=True,
+                                             skip_target_create=True)
         validate_mock.assert_called_once_with(location, source_format)
         wipe_mock.assert_called_once_with(device, '')
         udev_mock.assert_called_once_with()

@@ -393,7 +393,8 @@ def _write_whole_disk_image(image, image_info, device, source_format=None,
                               source_format=source_format,
                               out_format='host_device',
                               cache='directsync',
-                              out_of_order=True)
+                              out_of_order=True,
+                              skip_target_create=True)
     disk_utils.trigger_device_rescan(device)
 
 
