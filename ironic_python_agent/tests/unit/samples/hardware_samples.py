@@ -187,7 +187,9 @@ RAID_BLK_DEVICE_TEMPLATE = ("""
       {"kname":"md0", "model":"RAID", "size":1765517033470, "rota":false,
       "type":"raid1", "serial":null, "uuid":null, "partuuid":null},
       {"kname":"md1", "model":"RAID", "size":0, "rota":false, "type":"raid1",
-      "serial":null, "uuid":null, "partuuid":null}
+      "serial":null, "uuid":null, "partuuid":null},
+      {"kname":"dm-0", "model":"RAID", "size":1765517033470, "rota":false,
+      "type":"md", "uuid":null, "partuuid":null}
     ]
 }
 """)
