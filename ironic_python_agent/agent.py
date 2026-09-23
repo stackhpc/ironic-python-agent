@@ -572,6 +572,13 @@ class IronicPythonAgent(base.ExecuteCommandMixin):
         # Get the UUID so we can heartbeat to Ironic. Raises LookupNodeError
         # if there is an issue (uncaught, restart agent)
         self.started_at = _time()
+
+        # We can't set the clock / try to inspect or heartbeat until we
+        # have valid interfaces to perform those actions over. Standalone
+        # mode does not perform inspection or lookup, so skip the wait.
+        if not self.standalone:
+            self._wait_for_interface()
+
         # Attempt to sync the software clock
         utils.sync_clock(ignore_errors=True)
 
@@ -588,10 +595,6 @@ class IronicPythonAgent(base.ExecuteCommandMixin):
             # Inspection should be started before call to lookup, otherwise
             # lookup will fail due to unknown MAC.
             uuid = None
-            # We can't try to inspect or heartbeat until we have valid
-            # interfaces to perform those actions over.
-            self._wait_for_interface()
-
             if self.api_urls or cfg.CONF.inspection_callback_url:
                 try:
                     # Attempt inspection. This may fail, and previously
