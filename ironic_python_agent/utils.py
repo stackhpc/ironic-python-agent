@@ -1054,7 +1054,7 @@ def sync_clock(ignore_errors=False):
             # force a time sync now
             query = ("server %s iburst"
                      % shlex.quote(CONF.ntp_server))
-            execute('chronyd', '-q', query)
+            execute('chronyd', '-q', query, attempts=5)
             LOG.debug('Set software clock using chrony')
         except (processutils.ProcessExecutionError,
                 errors.CommandExecutionError) as e:
